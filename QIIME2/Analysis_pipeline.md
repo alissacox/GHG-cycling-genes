@@ -11,7 +11,7 @@ qiime --help
 ```
 # Read in Miseq Fastq files (with embedded barcodes)
 ## A little 'homework'
-* based on [QIIME Tutorial](https://docs.qiime2.org/2019.10/tutorials/importing/#sequence-data-with-sequence-quality-information-i-e-fastq http://qiime.org/1.3.0/tutorials/processing_illumina_data.html)
+based on [QIIME Tutorial](https://docs.qiime2.org/2019.10/tutorials/importing/#sequence-data-with-sequence-quality-information-i-e-fastq http://qiime.org/1.3.0/tutorials/processing_illumina_data.html)
 * Need to figure out format of our fastq files…. 
   * Indexes appear to be the last several BPs (8+8) of the 1st line in the FastQ file (AHC01):
 > @M00763:347:000000000-CP6CN:1:1101:13406:1878 1:N:0:ACTCGCTA+TCGACTAG■	GGTGACTGGGACTTCTGGGTTGACTGGAAGGATCGCCGTATGTGGCCGACGGTTGTGCCGATTCTGGGCGTGACCTTCTGCGCGGCGACGCAGGCGTTTTTCTGGGTGAACTTCCGTCTGCCGTTTGGCGCGGTGTTCGCGGCGCTGGGCCTGCTGATCGGCGAGTGGATCAACCGCTACGTGAACTTCTGGGGTTGGACCTATTTCCCGATCTCGCTGGTGTTCCCGTCGGCTCTGATGGTTCCGGCGATCTGGCTTGACGTGATCCTTCTGCTTTCGGGCTCCTATGTGATCACGGCGA
