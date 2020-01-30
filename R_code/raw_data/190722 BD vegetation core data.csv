@@ -1,0 +1,10 @@
+Orig_sample_id,Sample_ID,Location,Replicate,Biomass_g_cm2,Core_BD_g_cm3,Perc_OM
+B1,R1,Reserve,1,0.00,1.36,3.63
+B2,R2,Reserve,2,0.01,1.39,3.41
+B3,R3,Reserve,3,0.03,1.37,3.42
+C1,C1,Control,1,0.09,1.17,3.29
+C2,C2,Control,2,0.06,1.29,3.80
+C3,C3,Control,3,0.06,1.21,4.33
+E1,E1,Experimental,1,0.07,1.27,3.14
+E2,E2,Experimental,2,0.08,1.31,5.76
+E3,E3,Experimental,3,0.08,1.22,3.54
