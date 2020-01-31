@@ -37,7 +37,7 @@ perl -pe 's/^\s$//g' < 191220_pmoA_NCBI_single_line_sequences.fasta > 191220_cle
 ```
 The "191220_clean_pmoA_NCBI_sequences.fasta" file can be read into QIIME2 - see next step below.  You could use some of the file examination commands above to verify that the format is 1 line of sequence ID info followed by 1 line of Sequence (ACTG)....
 
-## For *nosZ* NCBI Fasta file -- downloaded ONLY bacterial nosZ sequences from INSDC:
+## *nosZ* NCBI Fasta file -- downloaded ONLY bacterial nosZ sequences from INSDC:
 Navigate to the NCBI FASTA file you downloaded - in this case we stuck our file ("200102_NCBI_nosZ_bact_INSDC_sequences.fasta") in a folder called "NCBI_nosZ" that is inside a "Reference_database" folder. To navigate there on the commandline (which may be different on your system):
 ``` 
 cd mnt/c/Users/xlibb/Desktop/QIIME2/Reference_database/NCBI_nosZ
@@ -86,3 +86,5 @@ qiime tools import \
   --type 'FeatureData[Sequence]'  
 #To check if this is formatted correctly, run:
 qiime tools validate nosZ/ref_NCBI_nosZ_seqs.qza
+``` 
+Now you have two reference databse files! However, these do not seem to be well-suited to the Deblur [denoise-other](https://docs.qiime2.org/2019.10/plugins/available/deblur/denoise-other/) alignment and filtering protocol. When we tried to use these databases that way, the script always failed (after running FOREVER). It wasn't obvious to us why that happened. But the databases do work to assign taxonomy (see [pipeline] as long as you have [fetched taxonomy strings]() to match the accession numbers at the beginning of each line of the FASTA files you formatted and imported into QIIME2.
