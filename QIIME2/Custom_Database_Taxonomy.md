@@ -1,4 +1,4 @@
-Here are the steps to create the taxonomy file for a [custom database](https://github.com/alissacox/GHG-cycling-genes/blob/master/QIIME2/Custom_Database_Creation.md) you created for use in QIIME2.
+Here are the steps to create the taxonomy file corresponding to a [custom database](https://github.com/alissacox/GHG-cycling-genes/blob/master/QIIME2/Custom_Database_Creation.md) you created for use in QIIME2.
 
 # Combining Accession #s matching custom reference databse with taxonomy strings from NCBI databases
 
