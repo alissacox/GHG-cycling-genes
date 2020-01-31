@@ -55,6 +55,11 @@ activate QIIME2 if you haven't already:
 conda activate qiime2-2019.10
 ``` 
 ## pmoA
+First navigate to your *pmoA* folder:
+``` 
+cd mnt/c/Users/xlibb/Desktop/QIIME2/pmoA
+``` 
+Now import your 'clean' (nicely formatted) Fasta file of *pmoA* reference sequences:
 ``` 
 qiime tools import \
   --input-path Reference_database/NCBI_pmoA/191220_clean_pmoA_NCBI_sequences.fasta \
@@ -68,11 +73,17 @@ qiime feature-table tabulate-seqs \
   --i-data ref_NCBI_pmoA_seqs.qza \
   --o-visualization ref_NCBI_pmoA_seqs.qzv
 ``` 	
-○	nosZ - For “Clean” FASTA file (1 header + 1 sequence line times # sequences)
-■	qiime tools import \
-■	  --input-path Reference_database/NCBI_nosZ/200102_clean_nosZ_NCBI_sequences.fasta\
-■	  --input-format DNAFASTAFormat \
-■	  --output-path nosZ/ref_NCBI_nosZ_seqs.qza \
-■	  --type 'FeatureData[Sequence]'  
-■	To check if this is formatted correctly, run:
-●	qiime tools validate nosZ/ref_NCBI_nosZ_seqs.qza
+## nosZ
+First navigate to your *nosZ* folder:
+``` 
+cd mnt/c/Users/xlibb/Desktop/QIIME2/nosZ
+``` 
+Import your fasta file of *nosZ* reference sequences:
+``` 
+qiime tools import \
+  --input-path Reference_database/NCBI_nosZ/200102_clean_nosZ_NCBI_sequences.fasta\
+  --input-format DNAFASTAFormat \
+  --output-path nosZ/ref_NCBI_nosZ_seqs.qza \
+  --type 'FeatureData[Sequence]'  
+#To check if this is formatted correctly, run:
+qiime tools validate nosZ/ref_NCBI_nosZ_seqs.qza
