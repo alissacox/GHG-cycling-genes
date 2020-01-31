@@ -1,4 +1,4 @@
-Here is the pipeline for analyzing raw Illumina MiSeq reads of functional gene amplicons! These samples came from the surface soils (0-~25cm) of three drainfield types (see [Metadata file]()). We extracted the DNA from these soils and amplified extracted DNA for both *pmoA* (particulate methane monooxygenase) and *nosZ* (nitrous oxide reductase). The run that generated these sequences had the two different gene amplicons (*pmoA* & *nosZ*) pooled equimolarly per sample. 
+Here is the pipeline for analyzing raw Illumina MiSeq reads of functional gene amplicons! These samples came from the surface soils (0-~25cm) of three drainfield types (see [Metadata file](https://github.com/alissacox/GHG-cycling-genes/blob/master/R_code/raw_data/200113_AHC_sequencing_sample_GHG_metadata.txt)). We extracted the DNA from these soils and amplified extracted DNA for both *pmoA* (particulate methane monooxygenase) and *nosZ* (nitrous oxide reductase). The run that generated these sequences had the two different gene amplicons (*pmoA* & *nosZ*) pooled equimolarly per sample. 
 * Samples AHC90-96 contain *nosZ* only.
 
 # Start QIIME2
@@ -162,8 +162,9 @@ qiime tools export   \
 biom convert -i exp-filt-pmoA-table-dada2/feature-table.biom -o exp-filt-pmoA-table-dada2/pmoA-filt-table-dada2.tsv --to-tsv
 ```
 
-## nosZ trimmed sequences
-●	no trimming of primers, trimming ends based on Q plots of trimmed sequences:
+## nosZ trimmed sequences (outputs from cutadapt step)
+* Again, no trimming of primers required, trimming ends based on Q plots of trimmed sequences:
+```
 ○	qiime dada2 denoise-paired \
 ○	  --i-demultiplexed-seqs trimmed-nosZ-unjoined-seqs.qza \
 ○	  --p-trunc-len-f 250 \
@@ -185,8 +186,11 @@ biom convert -i exp-filt-pmoA-table-dada2/feature-table.biom -o exp-filt-pmoA-ta
 ○	qiime metadata tabulate \
 ○	  --m-input-file dada2-trimmed-nosZ-denoising-stats.qza \
 ○	  --o-visualization dada2-trimmed-nosZ-denoising-stats.qzv
-■	AHC’s samples: Total sequences = 7539, total frequency = 673,960… on all 50 samples. Seems QUITE reasonable?! Most common seq comes back as nosZ on BLAST.
-■	SKW’s Samples: Total seq = 15K, total frequency =  2.2M
+```
+After this step, we are left with the total # of unique sequences = 7539, with a total frequency = 673,960… on all 50 samples.  Most common seq comes back as nosZ on BLAST.
+
+To export these sequences...
+```
 ○	qiime tools export   \
 ○	  --input-path dada2-trimmed-nosZ-table.qza  \
 ○	  --output-path exp-nosZ-table-dada2
@@ -197,20 +201,5 @@ biom convert -i exp-filt-pmoA-table-dada2/feature-table.biom -o exp-filt-pmoA-ta
 ○	  --i-table dada2-trimmed-nosZ-table.qza \
 ○	  --p-color-scheme viridis \
 ○	 --o-visualization dada2-trimmed-nosZ-table-heatmap.qzv
-○	Remove ‘reserve’ samples:
-■	qiime feature-table filter-samples \
-■	--i-table dada2-trimmed-nosZ-table.qza \
-■	--m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
-■	--p-where "Location IS 'Reserve'" \
-■	--p-exclude-ids \
-■	--o-filtered-table nosZ_active_df/active-dada2-trimmed-nosZ-table.qza
-■	qiime feature-table summarize \
-■	  --i-table nosZ_active_df/active-dada2-trimmed-nosZ-table.qza \
-■	  --o-visualization nosZ_active_df/active-dada2-trimmed-nosZ-table.qzv \
-■	  --m-sample-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt
-■	qiime tools export   \
-■	  --input-path nosZ_active_df/active-dada2-trimmed-nosZ-table.qza  \
-■	  --output-path nosZ_active_df/exp-active-nosZ-table-dada2
-■	Convert biom feature table to .tsv
-●	biom convert -i nosZ_active_df/exp-active-nosZ-table-dada2/feature-table.biom -o nosZ_active_df/exp-active-nosZ-table-dada2/active-nosZ-table-dada2.tsv --to-tsv
+
 
