@@ -124,7 +124,7 @@ Based on the outputs, this seems to have worked nicely too:
 First, we need to assess the quality of the primer-trimmed demultiplexed sequences for each gene. Then we can denoise each gene's sequences with Dada2
 
 ## pmoA trimmed sequences (cutadapt outputs from step above)
-Change directory to pmoA folder within our QIIME2 folder"
+Change directory to pmoA folder within our QIIME2 folder:
 ```
 cd /mnt/c/Users/xlibb/Desktop/QIIME2/pmoA
 ```
@@ -290,7 +290,7 @@ qiime metadata tabulate \
 ```
 ## nosZ: 
 ### Extract reference reads from the custom reference database (imported NCBI fasta files) using primers -- supposedly improves taxonomic accuracy
-Change directory to QIIME2 folder containing all the other folders:
+Change directory to QIIME2 folder containing all the other folders (if you haven't already):
 ```
 cd /mnt/c/Users/xlibb/Desktop/QIIME2
 ```
@@ -324,6 +324,10 @@ qiime metadata tabulate \
 ```
 ## To actually assign taxonomy 'for realz'…
 ### pmoA
+Change directory to pmoA folder within our QIIME2 folder:
+```
+cd /mnt/c/Users/xlibb/Desktop/QIIME2/pmoA
+```
 Assign taxonomy strings to the samples:
 ```
 qiime feature-classifier classify-sklearn \
@@ -369,6 +373,10 @@ qiime tools export   \
 biom convert -i exp-pmoA-collapsed-taxa-table-dada2/feature-table.biom -o exp-pmoA-collapsed-taxa-table-dada2/pmoA-taxa-table-dada2.tsv --to-tsv
 ```
 ### nosZ
+Change directory to nosZ folder within our QIIME2 folder:
+```
+cd /mnt/c/Users/xlibb/Desktop/QIIME2/nosZ
+```
 Assign taxonomy strings to the samples:
 ```
 qiime feature-classifier classify-sklearn \
