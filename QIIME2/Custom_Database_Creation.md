@@ -48,8 +48,8 @@ perl -pe 's/([ACGT]{70})\n/\1/g' < 200102_NCBI_nosZ_bact_INSDC_sequences.fasta >
 perl -pe 's/^\s$//g' < 200102_nosZ_NCBI_single_line_sequences.fasta > 200102_clean_nosZ_NCBI_sequences.fasta
 ``` 
 The "200102_clean_nosZ_NCBI_sequences.fasta" file is ready for import into QIIME2. You could use some of the file examination commands above to verify this....
-# Import your “Clean” FASTA files (nicely formatted to consist of {(1 header row + 1 sequence line) times # sequences} into QIIME2
-activate QIIME2 if you haven't already:
+# Import your “Clean” FASTA files (nicely formatted to consist of {(1 header row + 1 sequence line) times # sequences} into QIIME2: Create your Custom Database (at last!)
+Activate QIIME2 if you haven't already:
 ``` 
 conda activate qiime2-2019.10
 ``` 
