@@ -14,8 +14,8 @@ Can easily download fasta files from NCBI nucleotide search for all “hits”:
   * Send To > Complete Record > File > FASTA -- don’t include GI numbers
 
 To examine structure of file (which will be huge and a text editor may not allow you to open it) using the Linux commandline: 
-* od prints non-printing characters (useful in identifying how lines are split/terminated)
-* sed… command can print certain lines in text doc (to examine)
+* `od` prints non-printing characters (useful in identifying how lines are split/terminated)
+* `sed` command can print certain lines in text doc (to examine)
 ```
 head -20 [filename]
 od -N300 -c [filename]
