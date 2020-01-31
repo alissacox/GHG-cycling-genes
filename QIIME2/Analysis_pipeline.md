@@ -7,9 +7,10 @@ Here is the pipeline for analyzing raw Illumina MiSeq reads of functional gene a
 Open a Linux terminal and type:
 ```
 conda activate qiime2-2019.10
-conda deactivate qiime2-2019.10 (to shut down)
-# You can test to make sure the install worked by running: 
+# You can test to make sure the QIIME2 is running propery by running: 
 qiime --help
+# To shut down QIIME2 @ the end of your analysis...
+conda deactivate qiime2-2019.10
 ```
 # Read in Miseq Fastq files (with embedded barcodes)
 ## A little 'homework'
@@ -165,41 +166,35 @@ biom convert -i exp-filt-pmoA-table-dada2/feature-table.biom -o exp-filt-pmoA-ta
 ## nosZ trimmed sequences (outputs from cutadapt step)
 * Again, no trimming of primers required, trimming ends based on Q plots of trimmed sequences:
 ```
-○	qiime dada2 denoise-paired \
-○	  --i-demultiplexed-seqs trimmed-nosZ-unjoined-seqs.qza \
-○	  --p-trunc-len-f 250 \
-○	  --p-trunc-len-r 184 \
-○	  --p-chimera-method pooled \
-○	  --p-n-threads 0 \
-○	  --p-max-ee-f 15 \
-○	  --p-max-ee-r 15 \
-○	  --o-table dada2-trimmed-nosZ-table.qza \
-○	  --o-representative-sequences dada2-trimmed-nosZ-rep-seqs.qza \
-○	  --o-denoising-stats dada2-trimmed-nosZ-denoising-stats.qza
-○	qiime feature-table summarize \
-○	  --i-table dada2-trimmed-nosZ-table.qza \
-○	  --o-visualization dada2-trimmed-nosZ-table.qzv \
-○	  --m-sample-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt
-○	qiime feature-table tabulate-seqs \
-○	  --i-data dada2-trimmed-nosZ-rep-seqs.qza \
-○	  --o-visualization dada2-trimmed-nosZ-rep-seqs.qzv
-○	qiime metadata tabulate \
-○	  --m-input-file dada2-trimmed-nosZ-denoising-stats.qza \
-○	  --o-visualization dada2-trimmed-nosZ-denoising-stats.qzv
+qiime dada2 denoise-paired \
+  --i-demultiplexed-seqs trimmed-nosZ-unjoined-seqs.qza \
+  --p-trunc-len-f 250 \
+  --p-trunc-len-r 184 \
+  --p-chimera-method pooled \
+  --p-n-threads 0 \
+  --p-max-ee-f 15 \
+  --p-max-ee-r 15 \
+  --o-table dada2-trimmed-nosZ-table.qza \
+  --o-representative-sequences dada2-trimmed-nosZ-rep-seqs.qza \
+  --o-denoising-stats dada2-trimmed-nosZ-denoising-stats.qza
+qiime feature-table summarize \
+  --i-table dada2-trimmed-nosZ-table.qza \
+  --o-visualization dada2-trimmed-nosZ-table.qzv \
+  --m-sample-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt
+qiime feature-table tabulate-seqs \
+  --i-data dada2-trimmed-nosZ-rep-seqs.qza \
+  --o-visualization dada2-trimmed-nosZ-rep-seqs.qzv
+qiime metadata tabulate \
+  --m-input-file dada2-trimmed-nosZ-denoising-stats.qza \
+  --o-visualization dada2-trimmed-nosZ-denoising-stats.qzv
 ```
-After this step, we are left with the total # of unique sequences = 7539, with a total frequency = 673,960… on all 50 samples.  Most common seq comes back as nosZ on BLAST.
+After this step, we are left with the total # of unique sequences = 7539, with a total frequency = 673,960… on all 50 samples.  Most common sequence comes back as nosZ on BLAST.
 
 To export these sequences...
 ```
-○	qiime tools export   \
-○	  --input-path dada2-trimmed-nosZ-table.qza  \
-○	  --output-path exp-nosZ-table-dada2
-○	Convert biom feature table to .tsv
-■	biom convert -i exp-nosZ-table-dada2/feature-table.biom -o nosZ-table-dada2.tsv --to-tsv
-○	
-○	qiime feature-table heatmap \
-○	  --i-table dada2-trimmed-nosZ-table.qza \
-○	  --p-color-scheme viridis \
-○	 --o-visualization dada2-trimmed-nosZ-table-heatmap.qzv
-
+qiime tools export   \
+  --input-path dada2-trimmed-nosZ-table.qza  \
+  --output-path exp-nosZ-table-dada2
+# Convert biom feature table to .tsv
+biom convert -i exp-nosZ-table-dada2/feature-table.biom -o nosZ-table-dada2.tsv --to-tsv
 
