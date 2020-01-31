@@ -84,7 +84,7 @@ qiime demux summarize \
 Based on the output, this seems to have worked:
 * <100 sequences show up in AHC 90-96, which is good because these samples only contain *nosZ*, and <100 is an order of magnitude below the next sample which actually has pmoA (showing ~1K sequences). We’ll see if they get filtered out later…
 * The import & demux step resulted in 1.3M sequences across all samples, after this primer filtering step only 309K *pmoA* sequences remain. Seems reasonable, since *pmoA* is probably somewhat rare! 
-# nosZ
+## To separate *nosZ* sequences from "all" the sequences using the primers we used for initial PCR (still embedded in the raw fasta files we imported from the MiSeq run)
 * Make nosZ folder to keep this output in to make things less confusing!
 
 Change directory to nosZ folder within our QIIME2 folder:
@@ -255,6 +255,10 @@ To train the [Feature classifier](https://docs.qiime2.org/2019.10/tutorials/feat
 * Need a '[Custom Taxonomy Database](https://github.com/alissacox/GHG-cycling-genes/blob/master/QIIME2/Custom_Database_Taxonomy.md)' to correspond to the custom reference database (imported taxonomy strings (like those from NCBI) -- need tab-delimited file with accession number and semi-colon separated strings -- all done!)
 
 ## pmoA
+Change directory to QIIME2 folder containing all the other folders:
+```
+cd /mnt/c/Users/xlibb/Desktop/QIIME2
+```
 ### Extract reference reads from the custom reference database (imported NCBI fasta files) using primers -- supposedly improves taxonomic accuracy
 * F primer (A189gcF): GGNGACTGGGACTTCTGG; R primer (mb661R): CCGGMGCAACGTCYTTACC -- our sequences seem to be ~270-440 bps long. Don’t trim
 ```
@@ -286,6 +290,10 @@ qiime metadata tabulate \
 ```
 ## nosZ: 
 ### Extract reference reads from the custom reference database (imported NCBI fasta files) using primers -- supposedly improves taxonomic accuracy
+Change directory to QIIME2 folder containing all the other folders:
+```
+cd /mnt/c/Users/xlibb/Desktop/QIIME2
+```
 * F primer (nosZ1F): CGYTGTTCMTCGACAGCCAG; R primer (nosZ1662R): CGSACCTTSTTGCCSTYGCG... our sequences seem to be ~250-422 bps long. Tutorial says not to trim!
 ```
 qiime feature-classifier extract-reads \
