@@ -48,6 +48,11 @@ qiime demux summarize \
 * Cutadapt can take ALL wildcard bases. [Useful tool](http://arep.med.harvard.edu/labgc/adnan/projects/Utilities/revcomp.html) to auto-create reverse complements
 ## To separate *pmoA* sequences from "all" the sequences using the primers we used for initial PCR (still embedded in the raw fasta files we imported from the MiSeq run)
 * Make a pmoA folder to keep the rest of the pmoA analyis in - this will make things less confusing later on since some of the outputs will have the same names as the outputs from the same nosZ analyses!
+
+Change directory to pmoA folder within our QIIME2 folder:
+```
+cd /mnt/c/Users/xlibb/Desktop/QIIME2/pmoA
+```
 Because our PCR amplicons were sheared to 300bp length for the MiSeq run, our sequences will contain both the original primers and their reverse complements. So we need to trim the primer off beginning of each strand & the reverse complement of the other primer at the end of each strand
 * Our *pmoA* primers:
 	* F primer (A189gcF): GGNGACTGGGACTTCTGG
@@ -81,6 +86,11 @@ Based on the output, this seems to have worked:
 * The import & demux step resulted in 1.3M sequences across all samples, after this primer filtering step only 309K *pmoA* sequences remain. Seems reasonable, since *pmoA* is probably somewhat rare! 
 # nosZ
 * Make nosZ folder to keep this output in to make things less confusing!
+
+Change directory to nosZ folder within our QIIME2 folder:
+```
+cd /mnt/c/Users/xlibb/Desktop/QIIME2/nosZ
+```
 * Our *nosZ* primers:
 	* F primer (nosZ1F): CGYTGTTCMTCGACAGCCAG
 		* Reverse complement: CTGGCTGTCGAKGAACARCG
@@ -114,6 +124,10 @@ Based on the outputs, this seems to have worked nicely too:
 First, we need to assess the quality of the primer-trimmed demultiplexed sequences for each gene. Then we can denoise each gene's sequences with Dada2
 
 ## pmoA trimmed sequences (cutadapt outputs from step above)
+Change directory to pmoA folder within our QIIME2 folder"
+```
+cd /mnt/c/Users/xlibb/Desktop/QIIME2/pmoA
+```
 * We already trimmed the primers with 'cutadabt', so we don't need to trim primers off in this step.
 * The ends of reads need to be trimmed based on Q plots of trimmed sequences (trimmed-pmoA-unjoined-seqs.qzv):
 	* Forward read quality drops after ~265 bases
@@ -165,6 +179,10 @@ biom convert -i exp-filt-pmoA-table-dada2/feature-table.biom -o exp-filt-pmoA-ta
 ```
 
 ## nosZ trimmed sequences (outputs from cutadapt step)
+Change directory to nosZ folder within our QIIME2 folder:
+```
+cd /mnt/c/Users/xlibb/Desktop/QIIME2/nosZ
+```
 * Again, no trimming of primers required, trimming ends based on Q plots of trimmed sequences:
 ```
 qiime dada2 denoise-paired \
@@ -198,5 +216,128 @@ qiime tools export   \
   --output-path exp-nosZ-table-dada2
 # Convert biom feature table to .tsv
 biom convert -i exp-nosZ-table-dada2/feature-table.biom -o nosZ-table-dada2.tsv --to-tsv
+```
+# Create a Phylogenetic Tree from denoised feature table & rep seqs
+* create MAFFT tree following [Moving pictures tutorial](https://docs.qiime2.org/2019.10/tutorials/moving-pictures/)
+## pmoA
+Change directory to pmoA folder within our QIIME2 folder:
+```
+cd /mnt/c/Users/xlibb/Desktop/QIIME2/pmoA
+```
+Create tree:
+```
+qiime phylogeny align-to-tree-mafft-fasttree \
+  --i-sequences dada2-trimmed-pmoA-rep-seqs.qza \
+  --o-alignment aligned-dada2-pmoA-rep-seqs.qza \
+  --o-masked-alignment masked-aligned-dada2-pmoA-rep-seqs.qza \
+  --o-tree unrooted-dada2-pmoA-tree.qza \
+  --o-rooted-tree rooted-dada2-pmoA-tree.qza
+```
+## nosZ
+Change directory to nosZ folder within our QIIME2 folder:
+```
+cd /mnt/c/Users/xlibb/Desktop/QIIME2/nosZ
+```
+Create tree:
+```
+qiime phylogeny align-to-tree-mafft-fasttree \
+  --i-sequences dada2-trimmed-nosZ-rep-seqs.qza \
+  --o-alignment aligned-dada2-nosZ-rep-seqs.qza \
+  --o-masked-alignment masked-aligned-dada2-nosZ-rep-seqs.qza \
+  --o-tree unrooted-dada2-nosZ-tree.qza \
+  --o-rooted-tree rooted-dada2-nosZ-tree.qza
+```
 
+# Alpha Diversity
+* Check out the [excellent overview of all the alpha & beta diversity “options”](https://forum.qiime2.org/t/alpha-and-beta-diversity-explanations-and-commands/2282) in QIIME2
+* This code is based on the tutorial
+
+In general, we chose sampling depth (for rarification) based on sample with lowest reasonable # of sequence frequencies
+## pmoA 
+Change directory to pmoA folder within our QIIME2 folder:
+```
+cd /mnt/c/Users/xlibb/Desktop/QIIME2/pmoA
+```
+* lowest samples have 2 - next lowest 3,4,5 sequences… prob duds. Rarefy @ 12 (next highest?)... Max # of sequences is 550 seqs, but if we choose 160 , we'll get all but the top 3 samples?
+```
+qiime diversity alpha-rarefaction \
+  --i-table filtered-dada2-trimmed-pmoA-table.qza \
+  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
+  --o-visualization dada2_pmoA_alpha_rarefaction_curves.qzv \
+  --p-min-depth 2 \
+  --p-max-depth 160
+```
+We do not have very many *pmoA* sequences in our samples, but based on the per-sample rarefaction curves, it looks like we have OK sampling depths, since they mostly plateau.
+```
+qiime diversity core-metrics-phylogenetic \
+  --i-phylogeny rooted-dada2-pmoA-tree.qza \
+  --i-table filtered-dada2-trimmed-pmoA-table.qza \
+  --p-sampling-depth 12 \
+  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
+  --output-dir core-pmoA-metrics-results-dada2
+```
+### Categorical comparisons:
+```
+qiime diversity alpha-group-significance --i-alpha-diversity core-pmoA-metrics-results-dada2/observed_otus_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-pmoA-metrics-results-dada2/obs_otu-group-significance.qzv
+qiime diversity alpha-group-significance --i-alpha-diversity core-pmoA-metrics-results-dada2/evenness_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-pmoA-metrics-results-dada2/evenness-group-significance.qzv
+qiime diversity alpha-group-significance --i-alpha-diversity core-pmoA-metrics-results-dada2/faith_pd_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-pmoA-metrics-results-dada2/faith-pd-group-significance.qzv
+qiime diversity alpha-group-significance --i-alpha-diversity core-pmoA-metrics-results-dada2/shannon_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-pmoA-metrics-results-dada2/shannon_vector-group-significance.qzv
+```
+### Continuous variable comparisons (correlations):
+```
+qiime diversity alpha-correlation --i-alpha-diversity core-pmoA-metrics-results-dada2/shannon_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-pmoA-metrics-results-dada2/shannon-alpha-correlation.qzv
+```
+
+## nosZ
+Change directory to nosZ folder within our QIIME2 folder:
+```
+cd /mnt/c/Users/xlibb/Desktop/QIIME2/nosZ
+```
+Our lowest sample has 2956 sequences, next lowest 3.5k & ~4.6k. We will rarefy @ 2956. Max sample has 31k sequences, so rarify at 25k… 
+```
+qiime diversity alpha-rarefaction \
+  --i-table dada2-trimmed-nosZ-table.qza \
+  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
+  --o-visualization dada2_nosZ_alpha_rarefaction_curves.qzv \
+  --p-min-depth 10 \
+  --p-max-depth 25000
+```
+In contrast to *pmoA*, we had LOT of *nosZ* sequences in our samples. Our rarifaction curves show nice plateaus for any max depth over 15k.
+```
+○	qiime diversity core-metrics-phylogenetic \
+○	  --i-phylogeny rooted-dada2-nosZ-tree.qza \
+○	  --i-table dada2-trimmed-nosZ-table.qza \
+○	  --p-sampling-depth 2956 \
+○	  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
+○	  --output-dir core-nosZ-metrics-results-dada2
+○	qiime diversity alpha-group-significance --i-alpha-diversity core-nosZ-metrics-results-dada2/faith_pd_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-nosZ-metrics-results-dada2/faith-pd-group-significance.qzv
+○	qiime diversity alpha-group-significance --i-alpha-diversity core-nosZ-metrics-results-dada2/evenness_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-nosZ-metrics-results-dada2/evenness-group-significance.qzv
+○	qiime diversity alpha-group-significance --i-alpha-diversity core-nosZ-metrics-results-dada2/shannon_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-nosZ-metrics-results-dada2/shannon_vector-group-significance.qzv
+○	Looking at correlations among metadata and samples…
+■	qiime diversity alpha-correlation
+Beta Diversity
+Dada2 outputs
+●	nosZ
+○	Categorical variables
+○	qiime diversity beta-group-significance \
+○	  --i-distance-matrix core-nosZ-metrics-results-dada2/weighted_unifrac_distance_matrix.qza \
+○	  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
+○	  --m-metadata-column Location \
+○	  --o-visualization core-nosZ-metrics-results-dada2/weight-uni-location-significance.qzv 
+○	Continuous variables
+○	qiime diversity beta-correlation --i-distance-matrix core-nosZ-metrics-results-dada2/jaccard_distance_matrix.qza --p-intersect-ids  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --m-metadata-column Core_BD_g_cm3 --o-metadata-distance-matrix core-nosZ-metrics-results-dada2/jac-BD-beta-correlation-matrix.qza --o-mantel-scatter-visualization core-nosZ-metrics-results-dada2/jac-BD-flux-beta-correlation.qzv
+○	
+○	Emperor plot:
+■	qiime emperor plot \
+■	  --i-pcoa core-nosZ-metrics-results-dada2/unweighted_unifrac_pcoa_results.qza \
+■	  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
+■	  --p-custom-axes N2O_Flux_umol_m^2_h\
+■	  --o-visualization core-nosZ-metrics-results-dada2/unweighted-unifrac-emperor-N2O-flux.qzv
+○	pmoA
+○	qiime diversity beta-group-significance \
+○	  --i-distance-matrix core-pmoA-metrics-results-dada2/unweighted_unifrac_distance_matrix.qza \
+○	  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
+○	  --m-metadata-column Depth \
+○	  --o-visualization core-pmoA-metrics-results-dada2/unweighted-unifrac-depth-significance.qzv
+○	qiime diversity beta-correlation --i-distance-matrix core-pmoA-metrics-results-dada2/weighted_unifrac_distance_matrix.qza --p-intersect-ids  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --m-metadata-column CH4_Flux_umol_m2_h --o-metadata-distance-matrix core-pmoA-metrics-results-dada2/weight-uni-meth-flux-beta-correlation-matrix.qza --o-mantel-scatter-visualization core-pmoA-metrics-results-dada2/weight-uni-meth-flux-beta-correlation.qzv
 
