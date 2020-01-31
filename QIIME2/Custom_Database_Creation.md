@@ -37,7 +37,7 @@ perl -pe 's/^\s$//g' < 191220_pmoA_NCBI_single_line_sequences.fasta > 191220_cle
 ```
 The "191220_clean_pmoA_NCBI_sequences.fasta" file can be read into QIIME2 - see next step below.  You could use some of the file examination commands above to verify that the format is 1 line of sequence ID info followed by 1 line of Sequence (ACTG)....
 
-# For *nosZ* NCBI Fasta file -- downloaded ONLY bacterial nosZ sequences from INSDC:
+## For *nosZ* NCBI Fasta file -- downloaded ONLY bacterial nosZ sequences from INSDC:
 Navigate to the NCBI FASTA file you downloaded - in this case we stuck our file ("200102_NCBI_nosZ_bact_INSDC_sequences.fasta") in a folder called "NCBI_nosZ" that is inside a "Reference_database" folder. To navigate there on the commandline (which may be different on your system):
 ``` 
 cd mnt/c/Users/xlibb/Desktop/QIIME2/Reference_database/NCBI_nosZ
@@ -48,8 +48,7 @@ perl -pe 's/([ACGT]{70})\n/\1/g' < 200102_NCBI_nosZ_bact_INSDC_sequences.fasta >
 perl -pe 's/^\s$//g' < 200102_nosZ_NCBI_single_line_sequences.fasta > 200102_clean_nosZ_NCBI_sequences.fasta
 ``` 
 The "200102_clean_nosZ_NCBI_sequences.fasta" file is ready for import into QIIME2. You could use some of the file examination commands above to verify this....
-
-#For “Clean” FASTA file ((1 header row + 1 sequence line) times # sequences)
+# Import your “Clean” FASTA files (nicely formatted to consist of {(1 header row + 1 sequence line) times # sequences} into QIIME2
 activate QIIME2 if you haven't already:
 ``` 
 conda activate qiime2-2019.10
