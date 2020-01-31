@@ -46,7 +46,7 @@ IGNORE the errors that pop up if the cursor is still “thinking” - the errors
 
 Make a file (in notepad or in some commandline function) called “Entrez_fetch_nosZ_Tax_from_Accs_script.sh” containing:
 ```
-for next in $(cat 1191221_NCBI_nosZ_sequence_accs_.seq); do LINEAGE=$(efetch -db nucleotide -id $next -format gbc | xtract -insd INSDSeq_taxonomy); echo -e "$next\t$LINEAGE"; done
+for next in $(cat 200103_NCBI_nosZ_bact_INSDC_acc.seq); do LINEAGE=$(efetch -db nucleotide -id $next -format gbc | xtract -insd INSDSeq_taxonomy); echo -e "$next\t$LINEAGE"; done
 ```
 Then run: 
 ```
