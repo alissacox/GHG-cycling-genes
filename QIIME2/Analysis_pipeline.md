@@ -2,7 +2,8 @@ Here is the pipeline for analyzing raw Illumina MiSeq reads of functional gene a
 * Samples AHC90-96 contain *nosZ* only.
 
 # Start QIIME2
-* Need to have installed [QIIME2 version 2019.10](https://docs.qiime2.org/2019.10/install/native/) natively installed via [miniconda](https://docs.conda.io/en/latest/miniconda.html)
+* Need to have installed [QIIME2 version 2019.10](https://docs.qiime2.org/2019.10/install/native/) natively installed via [miniconda](https://docs.conda.io/en/latest/miniconda.html).
+
 Open a Linux terminal and type:
 ```
 conda activate qiime2-2019.10
@@ -12,7 +13,7 @@ qiime --help
 ```
 # Read in Miseq Fastq files (with embedded barcodes)
 ## A little 'homework'
-* based on [QIIME2 Tutorial](https://docs.qiime2.org/2019.10/tutorials/importing/#sequence-data-with-sequence-quality-information-i-e-fastq http://qiime.org/1.3.0/tutorials/processing_illumina_data.html)
+* based on [QIIME2 import tutorial](https://docs.qiime2.org/2019.10/tutorials/importing/#sequence-data-with-sequence-quality-information-i-e-fastq) and [processing Illumina data tutorial](http://qiime.org/1.3.0/tutorials/processing_illumina_data.html)
 * Need to figure out format of our fastq files…. 
   * Indexes appear to be the last several BPs (8+8) of the 1st line in the FastQ file (AHC01):
 > @M00763:347:000000000-CP6CN:1:1101:13406:1878 1:N:0:ACTCGCTA+TCGACTAG■	GGTGACTGGGACTTCTGGGTTGACTGGAAGGATCGCCGTATGTGGCCGACGGTTGTGCCGATTCTGGGCGTGACCTTCTGCGCGGCGACGCAGGCGTTTTTCTGGGTGAACTTCCGTCTGCCGTTTGGCGCGGTGTTCGCGGCGCTGGGCCTGCTGATCGGCGAGTGGATCAACCGCTACGTGAACTTCTGGGGTTGGACCTATTTCCCGATCTCGCTGGTGTTCCCGTCGGCTCTGATGGTTCCGGCGATCTGGCTTGACGTGATCCTTCTGCTTTCGGGCTCCTATGTGATCACGGCGA
@@ -47,7 +48,7 @@ qiime demux summarize \
 ## To separate *pmoA* sequences from "all" the sequences using the primers we used for initial PCR (still embedded in the raw fasta files we imported from the MiSeq run)
 * Make a pmoA folder to keep the rest of the pmoA analyis in - this will make things less confusing later on since some of the outputs will have the same names as the outputs from the same nosZ analyses!
 Because our PCR amplicons were sheared to 300bp length for the MiSeq run, our sequences will contain both the original primers and their reverse complements. So we need to trim the primer off beginning of each strand & the reverse complement of the other primer at the end of each strand
-* Our primers:
+* Our *pmoA* primers:
 	* F primer (A189gcF): GGNGACTGGGACTTCTGG
 		* Reverse complement = CCAGAAGTCCCAGTCNCC
 	* R primer (mb661R): CCGGMGCAACGTCYTTACC
@@ -69,10 +70,38 @@ qiime cutadapt trim-paired \
   --p-minimum-length 150 \
   --p-error-rate 0.3 \
   --o-trimmed-sequences pmoA/trimmed-pmoA-unjoined-seqs.qza
-# This step Takes ~10 mins to run
+# This step takes ~10 mins to run
 qiime demux summarize \
   --i-data pmoA/trimmed-pmoA-unjoined-seqs.qza \
   --o-visualization pmoA/trimmed-pmoA-unjoined-seqs.qzv
 ```
-Based on the output, this seems to have worked. <100 sequences show up in AHC 90-96, which is good because these samples only contain *nosZ*, and <100 is an order of magnitude below the next sample which actually has pmoA (showing ~1K sequences). We’ll see if they get filtered out later…
+Based on the output, this seems to have worked:
+* <100 sequences show up in AHC 90-96, which is good because these samples only contain *nosZ*, and <100 is an order of magnitude below the next sample which actually has pmoA (showing ~1K sequences). We’ll see if they get filtered out later…
+* The import & demux step resulted in 1.3M sequences across all samples, after this primer filtering step only 309K *pmoA* sequences remain. Seems reasonable, since *pmoA* is probably somewhat rare! 
+# nosZ
+* Make nosZ folder to keep this output in to make things less confusing!
+* Our *nosZ* primers:
+	* F primer (nosZ1F): CGYTGTTCMTCGACAGCCAG
+		* Reverse complement: CTGGCTGTCGAKGAACARCG
+	* R primer (nosZ1662R): CGSACCTTSTTGCCSTYGCG
+		* Reverse complement: CGCRASGGCAASAAGGTSCG
+Code for cutting the nosZ primers from the samples and only keeping reads that were trimmed:
+```
+qiime cutadapt trim-paired \
+  --i-demultiplexed-sequences demux-paired-end.qza \
+  --p-front-f CGYTGTTCMTCGACAGCCAG \
+  --p-adapter-f CGCRASGGCAASAAGGTSCG \
+  --p-front-r CGSACCTTSTTGCCSTYGCG \
+  --p-adapter-r CTGGCTGTCGAKGAACARCG \
+  --p-cores 8 \
+  --p-discard-untrimmed \
+  --p-overlap 10 \
+  --p-minimum-length 150 \
+  --p-error-rate 0.3 \
+  --o-trimmed-sequences nosZ/trimmed-nosZ-unjoined-seqs.qza
+qiime demux summarize \
+  --i-data nosZ/trimmed-nosZ-unjoined-seqs.qza \
+  --o-visualization nosZ/trimmed-nosZ-unjoined-seqs.qzv
+```
+■	For AHC’s samples, demux step resulted in 1.3M sequences, after this primer filtering step ended up with ~1M “nosZ” sequences. YES! That adds up nicely to 1.3M with the 309K “pmoA” sequences! #winning. Longest seq = 420, 20% @ 414. Trim @ 414
 
