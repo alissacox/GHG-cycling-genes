@@ -250,7 +250,7 @@ qiime phylogeny align-to-tree-mafft-fasttree \
 
 # Alpha Diversity
 * Check out the [excellent overview of all the alpha & beta diversity “options”](https://forum.qiime2.org/t/alpha-and-beta-diversity-explanations-and-commands/2282) in QIIME2
-* This code is based on the [Moving pictures tutorial](https://docs.qiime2.org/2019.10/tutorials/moving-pictures/)
+* This code is based on the [Moving pictures tutorial](https://docs.qiime2.org/2019.10/tutorials/moving-pictures/) - there's not much interpretation here, just some basics to get you started. The [R code](https://github.com/alissacox/GHG-cycling-genes/tree/master/R_code) has examples of how to do some of the same analyses using the 'phyloseq' package.
 
 In general, we chose sampling depth (for rarification) based on sample with lowest reasonable # of sequence frequencies
 ## pmoA 
@@ -323,6 +323,7 @@ qiime diversity alpha-correlation  --i-alpha-diversity core-nosZ-metrics-results
 ```
 # Beta Diversity
 * This is adapted from the [Moving pictures tutorial](https://docs.qiime2.org/2019.10/tutorials/moving-pictures/)
+* there's not much interpretation here, just some basics to get you started. The [R code](https://github.com/alissacox/GHG-cycling-genes/tree/master/R_code) has examples of how to do some of the same analyses using the 'phyloseq' package.
 ## pmoA
 Categorical variables:
 ```
@@ -358,3 +359,160 @@ qiime emperor plot \
   --o-visualization core-nosZ-metrics-results-dada2/unweighted-unifrac-emperor-N2O-flux.qzv
 ```
 
+# The good stuff: Assigning taxonomy to unique sequences
+* based on the [___ tutorial]()
+To train the [Feature classifier](https://docs.qiime2.org/2019.10/tutorials/feature-classifier/)
+* Need to have '[Custom Reference Database](https://github.com/alissacox/GHG-cycling-genes/blob/master/QIIME2/Custom_Database_Creation.md)' (imported FASTA sequences (like those from NCBI) -- all done!)
+* Need a '[Custom Taxonomy Database](https://github.com/alissacox/GHG-cycling-genes/blob/master/QIIME2/Custom_Database_Taxonomy.md)' to correspond to the custom reference database (imported taxonomy strings (like those from NCBI) -- need tab-delimited file with accession number and semi-colon separated strings -- all done!)
+
+## pmoA
+### Extract reference reads from the custom reference database (imported NCBI fasta files) using primers -- supposedly improves taxonomic accuracy
+* F primer (A189gcF): GGNGACTGGGACTTCTGG; R primer (mb661R): CCGGMGCAACGTCYTTACC -- our sequences seem to be ~270-440 bps long. Don’t trim
+```
+qiime feature-classifier extract-reads \
+  --i-sequences pmoA/ref_NCBI_pmoA_seqs.qza \
+  --p-f-primer GGNGACTGGGACTTCTGG \
+  --p-r-primer CCGGMGCAACGTCYTTACC \
+  --p-min-length 200 \
+  --p-max-length 520 \
+  --o-reads pmoA/pmoA_primer_NCBI_ref-seqs.qza
+```
+This spits out ~11.5k *pmoA* sequences matching our primers from the original ~34k...
+### Train classifier:
+```
+qiime feature-classifier fit-classifier-naive-bayes \
+  --i-reference-reads pmoA/pmoA_primer_NCBI_ref-seqs.qza \
+  --i-reference-taxonomy pmoA/ref-NCBI_pmoA-taxonomy.qza \
+  --o-classifier pmoA/NCBI_pmoA_classifier.qza
+```
+### Test classifier: (same as actually assigning taxonomy to sequences processed through QIIME2)
+```
+qiime feature-classifier classify-sklearn \
+  --i-classifier NCBI_pmoA_classifier.qza \
+  --i-reads dada2-trimmed-pmoA-rep-seqs.qza \
+  --o-classification test_pmoA_taxonomy.qza
+qiime metadata tabulate \
+  --m-input-file test_pmoA_taxonomy.qza \
+  --o-visualization test_pmoA_taxonomy.qzv
+```
+## nosZ: 
+### Extract reference reads from the custom reference database (imported NCBI fasta files) using primers -- supposedly improves taxonomic accuracy
+* F primer (nosZ1F): CGYTGTTCMTCGACAGCCAG; R primer (nosZ1662R): CGSACCTTSTTGCCSTYGCG... our sequences seem to be ~250-422 bps long. Tutorial says not to trim!
+```
+qiime feature-classifier extract-reads \
+  --i-sequences nosZ/ref_NCBI_nosZ_seqs.qza \
+  --p-f-primer  CGYTGTTCMTCGACAGCCAG\
+  --p-r-primer CGSACCTTSTTGCCSTYGCG\
+  --p-min-length 200 \
+  --p-max-length 500 \
+  --o-reads nosZ/nosZ_primer_NCBI_ref-seqs.qza
+```
+This only puts out 8800 sequences *nosZ* sequences matching our primers from the original ~29k.
+### Train classifier:
+```
+qiime feature-classifier fit-classifier-naive-bayes \
+  --i-reference-reads nosZ/nosZ_primer_NCBI_ref-seqs.qza \
+  --i-reference-taxonomy nosZ/ref-NCBI_nosZ-taxonomy.qza \
+  --o-classifier nosZ/NCBI_nosZ_classifier.qza
+```
+### Test classifier:
+```
+qiime feature-classifier classify-sklearn \
+  --i-classifier nosZ/NCBI_nosZ_classifier.qza \
+  --i-reads nosZ/dada2-trimmed-nosZ-rep-seqs.qza \
+  --o-classification nosZ/test_nosZ_taxonomy.qza
+qiime metadata tabulate \
+  --m-input-file nosZ/test_nosZ_taxonomy.qza \
+  --o-visualization nosZ/test_nosZ_taxonomy.qzv
+```
+## To actually assign taxonomy 'for realz'…
+### pmoA
+Assign taxonomy strings to the samples:
+```
+qiime feature-classifier classify-sklearn \
+  --i-classifier NCBI_pmoA_classifier.qza \
+  --i-reads dada2-trimmed-pmoA-rep-seqs.qza \
+  --o-classification dada2_pmoA_taxonomy.qza
+qiime metadata tabulate \
+  --m-input-file dada2_pmoA_taxonomy.qza \
+  --o-visualization dada2_pmoA_taxonomy.qzv
+qiime tools export   \
+  --input-path dada2_pmoA_taxonomy.qza  \
+  --output-path dada2_pmoA_taxonomy
+```
+Make barplots:
+```
+qiime taxa barplot \
+  --i-table filtered-dada2-trimmed-pmoA-table.qza \
+  --i-taxonomy dada2_pmoA_taxonomy.qza \
+  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
+  --o-visualization dada2_pmoA_taxa-bar-plots.qzv
+```
+Compare samples to taxa contained (taxonomy-ASV table)
+```
+qiime taxa collapse \
+   --i-table filtered-dada2-trimmed-pmoA-table.qza \
+   --i-taxonomy dada2_pmoA_taxonomy.qza \
+   --p-level 7 \
+   --o-collapsed-table dada2-trimmed-pmoA-collapsed-taxa-table.qza
+qiime metadata tabulate \
+  --m-input-file dada2-trimmed-pmoA-collapsed-taxa-table.qza \
+  --o-visualization dada2-trimmed-pmoA-collapsed-taxa-table.qzv
+```
+Create heatmap of samples vs taxonomy
+```
+qiime feature-table heatmap  --i-table dada2-trimmed-pmoA-collapsed-taxa-table.qza --m-sample-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt  --m-sample-metadata-column Sampling_ID  --p-color-scheme viridis  --o-visualization dada2-trimmed-pmoA-collapsed-taxa-table-heatmap.qzv
+```
+Export so can beautify taxonomy & use in R…
+```
+qiime tools export   \
+  --input-path dada2-trimmed-pmoA-collapsed-taxa-table.qza  \
+  --output-path exp-pmoA-collapsed-taxa-table-dada2
+#Convert biom feature table to .tsv
+biom convert -i exp-pmoA-collapsed-taxa-table-dada2/feature-table.biom -o exp-pmoA-collapsed-taxa-table-dada2/pmoA-taxa-table-dada2.tsv --to-tsv
+```
+### nosZ
+Assign taxonomy strings to the samples:
+```
+qiime feature-classifier classify-sklearn \
+  --i-classifier NCBI_nosZ_classifier.qza \
+  --i-reads dada2-trimmed-nosZ-rep-seqs.qza \
+  --o-classification dada2_nosZ_taxonomy.qza
+qiime metadata tabulate \
+  --m-input-file dada2_nosZ_taxonomy.qza \
+  --o-visualization dada2_nosZ_taxonomy.qzv
+qiime tools export   \
+  --input-path dada2_nosZ_taxonomy.qza  \
+  --output-path dada2_nosZ_taxonomy
+```
+Make barplots: --- need to find a way to collapse “duplicates” (this is probably a function of confidence? Suggestions welcome) … the input taxonomy file is not the issue. `qiime taxa collapse` does not work to solve issue…
+```
+qiime taxa barplot \
+  --i-table dada2-trimmed-nosZ-table.qza \
+  --i-taxonomy dada2_nosZ_taxonomy.qza \
+  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
+  --o-visualization dada2_nosZ_taxa-bar-plots.qzv
+```
+Compare samples to taxa contained (taxonomy-ASV table)
+```
+qiime taxa collapse \
+   --i-table dada2-trimmed-nosZ-table.qza \
+   --i-taxonomy dada2_nosZ_taxonomy.qza \
+   --p-level 8 \
+   --o-collapsed-table dada2-trimmed-nosZ-collapsed-taxa-table.qza
+qiime metadata tabulate \
+  --m-input-file dada2-trimmed-nosZ-collapsed-taxa-table.qza \
+  --o-visualization dada2-trimmed-nosZ-collapsed-taxa-table.qzv
+```
+Create heatmap of samples vs taxonomy
+```
+qiime feature-table heatmap  --i-table dada2-trimmed-pmoA-collapsed-taxa-table.qza --m-sample-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt  --m-sample-metadata-column Sampling_ID  --p-color-scheme viridis  --o-visualization dada2-trimmed-pmoA-collapsed-taxa-table-heatmap.qzv
+```
+Export so can manually edit/collapse the duplicate taxonomy strings...
+```
+qiime tools export   \
+  --input-path dada2-trimmed-nosZ-collapsed-taxa-table.qza  \
+  --output-path exp-nosZ-collapsed-taxa-table-dada2
+#Convert biom feature table to .tsv
+biom convert -i exp-nosZ-collapsed-taxa-table-dada2/feature-table.biom -o exp-nosZ-collapsed-taxa-table-dada2/nosZ-taxa-table-dada2.tsv --to-tsv
+```
