@@ -1,4 +1,4 @@
-Here is the pipeline for analyzing raw Illumina MiSeq reads of functional gene amplicons! These samples came from the surface soils (0-~25cm) of three drainfield types (see [Metadata file](https://github.com/alissacox/GHG-cycling-genes/blob/master/R_code/raw_data/200113_AHC_sequencing_sample_GHG_metadata.txt)). We extracted the DNA from these soils and amplified extracted DNA for both *pmoA* (particulate methane monooxygenase) and *nosZ* (nitrous oxide reductase). The run that generated these sequences had the two different gene amplicons (*pmoA* & *nosZ*) pooled equimolarly per sample. 
+Here is the pipeline for analyzing raw Illumina MiSeq reads of functional gene amplicons! These samples came from the surface soils (0-~25cm) of three drainfield types (see [Metadata file](https://github.com/alissacox/GHG-cycling-genes/blob/master/R_code/raw_data/200113_AHC_sequencing_sample_GHG_metadata.txt)). We extracted the DNA from these soils and amplified extracted DNA for both *pmoA* (particulate methane monooxygenase) and *nosZ* (nitrous oxide reductase). The run that generated these [sequences](https://github.com/alissacox/GHG-cycling-genes/tree/master/Raw_Illumina_Seq_Reads) had the two different gene amplicons (*pmoA* & *nosZ*) pooled equimolarly per sample. 
 * Samples AHC90-96 contain *nosZ* only.
 
 # Start QIIME2
@@ -198,4 +198,5 @@ qiime tools export   \
   --output-path exp-nosZ-table-dada2
 # Convert biom feature table to .tsv
 biom convert -i exp-nosZ-table-dada2/feature-table.biom -o nosZ-table-dada2.tsv --to-tsv
+
 
