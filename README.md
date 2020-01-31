@@ -1,5 +1,5 @@
 # GHG-cycling-genes
-Pipeline to analyze functional gene amplicons from Illumina MiSeq runs with QIIME 2 and other commandline tools - from n00bs for n00bs
+This is an annotated pipeline to analyze functional gene amplicons from Illumina MiSeq runs with QIIME 2 and other commandline tools - written by people trying to learn how to code at the same time as learning how to run these analyses. This resource is meant to help others  (like us) who are just learning how to use QIIME2 and basic commandline coding. We have found that often times the QIIME2 user forums answers/solutions seem to be written by people who are experts and assume others know how to do many of the basic behind-the-scenes formatting and editing of data/files that were mysterious to us. Here we present code and descriptions that will hopefully help fellow n00bs. We hope this is useful, and welcome suggestions for improvement!
 
 The raw sequence reads for this analysis can be found in the [Raw_Illumina_Seq_Reads](https://github.com/alissacox/GHG-cycling-genes/tree/master/Raw_Illumina_Seq_Reads) folder.
 
@@ -7,4 +7,4 @@ The [QIIME2](https://github.com/alissacox/GHG-cycling-genes/tree/master/QIIME2) 
 
 Note: This analysis pipeline requires a working Linux terminal. This pipeline ran successfully on several Windows 10 machines with the [Windows Subsystem for Linux enabled](https://www.windowscentral.com/install-windows-subsystem-linux-windows-10) and using Ubuntu (18.04). These commands also ran without problems on a native Ubuntu (18.04) installation.
 
-The [R code](https://github.com/alissacox/GHG-cycling-genes/tree/master/R_code) to perform statistical analyses as well as calculate alpha & beta diversity & make ggplot graphs is also included. This folder also includes all the files required to run the script.
+The [R code](https://github.com/alissacox/GHG-cycling-genes/tree/master/R_code) to perform statistical analyses as well as calculate alpha & beta diversity & make ggplot graphs is also included. This folder also includes all the files required to run the script, as well as some sample metadata.
