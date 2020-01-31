@@ -141,8 +141,9 @@ qiime metadata tabulate \
   --m-input-file dada2-trimmed-pmoA-denoising-stats.qza \
   --o-visualization dada2-trimmed-pmoA-denoising-stats.qzv
 ```
-■	Only get out 161 sequences, and 2 samples (AHC 36 & 42) without any… seems very lowwwwww?
-■	Filter out ‘empty’ samples:
+This step results in 'only' 161 unique *pmoA* sequences, but that's on par with other studies. Samples AHC>90 don't have any sequences (makes sense because these don't have *pmoA*), and two other samples (AHC 36 & 42) don't appear to have any *pmoA* sequences either (must not have had a lot of pmoA?).
+
+Need to filter out ‘empty’ samples so we can do some of the downstream analyses without errors:
 ```
 qiime feature-table filter-samples \
   --i-table dada2-trimmed-pmoA-table.qza \
@@ -152,9 +153,9 @@ qiime metadata tabulate \
   --m-input-file filtered-dada2-trimmed-pmoA-table.qza \
   --o-visualization filtered-dada2-trimmed-pmoA-table.qzv
   ```
-This resulted in removing samples AHC>90 (makes sense because these don't have *pmoA*) and samples 36 & 42 (must not have had a lot of pmoA?)...
+This resulted in removing samples AHC>90 and samples 36 & 42 ...
 
-To export these data for use in R with the phyloseq package, or to look at them in a spreadsheet program:
+To export these data (feature/ASV/"OTU" table) for use in R with the phyloseq package, or to look at them in a spreadsheet program:
 ```
 qiime tools export   \
   --input-path filtered-dada2-trimmed-pmoA-table.qza  \
@@ -190,7 +191,7 @@ qiime metadata tabulate \
 ```
 After this step, we are left with the total # of unique sequences = 7539, with a total frequency = 673,960… on all 50 samples.  Most common sequence comes back as nosZ on BLAST.
 
-To export these sequences...
+To export this feature table...
 ```
 qiime tools export   \
   --input-path dada2-trimmed-nosZ-table.qza  \
