@@ -1,4 +1,4 @@
-Here is the pipeline for analyzing raw Illumina MiSeq reads of functional gene amplicons! The run that generated these genes had two different gene amplicons (*pmoA* & *nosZ*) pooled equimolarly per sample. 
+Here is the pipeline for analyzing raw Illumina MiSeq reads of functional gene amplicons! These samples came from the surface soils (0-~25cm) of three drainfield types (see [Metadata file]()). We extracted the DNA from these soils and amplified extracted DNA for both *pmoA* (particulate methane monooxygenase) and *nosZ* (nitrous oxide reductase). The run that generated these sequences had the two different gene amplicons (*pmoA* & *nosZ*) pooled equimolarly per sample. 
 * Samples AHC90-96 contain *nosZ* only.
 
 # Start QIIME2
@@ -85,6 +85,7 @@ Based on the output, this seems to have worked:
 		* Reverse complement: CTGGCTGTCGAKGAACARCG
 	* R primer (nosZ1662R): CGSACCTTSTTGCCSTYGCG
 		* Reverse complement: CGCRASGGCAASAAGGTSCG
+
 Code for cutting the nosZ primers from the samples and only keeping reads that were trimmed:
 ```
 qiime cutadapt trim-paired \
@@ -103,5 +104,113 @@ qiime demux summarize \
   --i-data nosZ/trimmed-nosZ-unjoined-seqs.qza \
   --o-visualization nosZ/trimmed-nosZ-unjoined-seqs.qzv
 ```
-■	For AHC’s samples, demux step resulted in 1.3M sequences, after this primer filtering step ended up with ~1M “nosZ” sequences. YES! That adds up nicely to 1.3M with the 309K “pmoA” sequences! #winning. Longest seq = 420, 20% @ 414. Trim @ 414
+Based on the outputs, this seems to have worked nicely too:
+* The import & demux step resulted in 1.3M sequences, after this primer filtering step we ended up with ~1M *nosZ* sequences. YES! That adds up nicely to 1.3M with the 309K *pmoA* sequences! #winning. Longest seq = 420, 20% @ 414. Trim @ 414
+
+# Dada2: join reads, quality filter and denoise
+* Modified from [Atacama soils tutorial](https://docs.qiime2.org/2019.10/tutorials/atacama-soils/#atacama-demux)
+
+First, we need to assess the quality of the primer-trimmed demultiplexed sequences for each gene. Then we can denoise each gene's sequences with Dada2
+
+## pmoA trimmed sequences (cutadapt outputs from step above)
+* We already trimmed the primers with 'cutadabt', so we don't need to trim primers off in this step.
+* The ends of reads need to be trimmed based on Q plots of trimmed sequences (trimmed-pmoA-unjoined-seqs.qzv):
+	* Forward read quality drops after ~265 bases
+	* Reverse read quality drops after ~195 bases
+```
+qiime dada2 denoise-paired \
+  --i-demultiplexed-seqs trimmed-pmoA-unjoined-seqs.qza \
+  --p-trunc-len-f 265 \
+  --p-trunc-len-r 195 \
+  --p-chimera-method pooled \
+  --p-n-threads 0 \
+  --p-max-ee-f 20 \
+  --p-max-ee-r 20 \
+  --o-table dada2-trimmed-pmoA-table.qza \
+  --o-representative-sequences dada2-trimmed-pmoA-rep-seqs.qza \
+  --o-denoising-stats dada2-trimmed-pmoA-denoising-stats.qza
+qiime feature-table summarize \
+  --i-table dada2-trimmed-pmoA-table.qza \
+  --o-visualization dada2-trimmed-pmoA-table.qzv \
+  --m-sample-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt
+qiime feature-table tabulate-seqs \
+  --i-data dada2-trimmed-pmoA-rep-seqs.qza \
+  --o-visualization dada2-trimmed-pmoA-rep-seqs.qzv
+qiime metadata tabulate \
+  --m-input-file dada2-trimmed-pmoA-denoising-stats.qza \
+  --o-visualization dada2-trimmed-pmoA-denoising-stats.qzv
+```
+■	Only get out 161 sequences, and 2 samples (AHC 36 & 42) without any… seems very lowwwwww?
+■	Filter out ‘empty’ samples:
+```
+qiime feature-table filter-samples \
+  --i-table dada2-trimmed-pmoA-table.qza \
+  --p-min-features 1 \
+  --o-filtered-table filtered-dada2-trimmed-pmoA-table.qza
+qiime metadata tabulate \
+  --m-input-file filtered-dada2-trimmed-pmoA-table.qza \
+  --o-visualization filtered-dada2-trimmed-pmoA-table.qzv
+  ```
+This resulted in removing samples AHC>90 (makes sense because these don't have *pmoA*) and samples 36 & 42 (must not have had a lot of pmoA?)...
+
+To export these data for use in R with the phyloseq package, or to look at them in a spreadsheet program:
+```
+qiime tools export   \
+  --input-path filtered-dada2-trimmed-pmoA-table.qza  \
+  --output-path exp-filt-pmoA-table-dada2
+# To convert this file to a .tsv:
+biom convert -i exp-filt-pmoA-table-dada2/feature-table.biom -o exp-filt-pmoA-table-dada2/pmoA-filt-table-dada2.tsv --to-tsv
+```
+
+## nosZ trimmed sequences
+●	no trimming of primers, trimming ends based on Q plots of trimmed sequences:
+○	qiime dada2 denoise-paired \
+○	  --i-demultiplexed-seqs trimmed-nosZ-unjoined-seqs.qza \
+○	  --p-trunc-len-f 250 \
+○	  --p-trunc-len-r 184 \
+○	  --p-chimera-method pooled \
+○	  --p-n-threads 0 \
+○	  --p-max-ee-f 15 \
+○	  --p-max-ee-r 15 \
+○	  --o-table dada2-trimmed-nosZ-table.qza \
+○	  --o-representative-sequences dada2-trimmed-nosZ-rep-seqs.qza \
+○	  --o-denoising-stats dada2-trimmed-nosZ-denoising-stats.qza
+○	qiime feature-table summarize \
+○	  --i-table dada2-trimmed-nosZ-table.qza \
+○	  --o-visualization dada2-trimmed-nosZ-table.qzv \
+○	  --m-sample-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt
+○	qiime feature-table tabulate-seqs \
+○	  --i-data dada2-trimmed-nosZ-rep-seqs.qza \
+○	  --o-visualization dada2-trimmed-nosZ-rep-seqs.qzv
+○	qiime metadata tabulate \
+○	  --m-input-file dada2-trimmed-nosZ-denoising-stats.qza \
+○	  --o-visualization dada2-trimmed-nosZ-denoising-stats.qzv
+■	AHC’s samples: Total sequences = 7539, total frequency = 673,960… on all 50 samples. Seems QUITE reasonable?! Most common seq comes back as nosZ on BLAST.
+■	SKW’s Samples: Total seq = 15K, total frequency =  2.2M
+○	qiime tools export   \
+○	  --input-path dada2-trimmed-nosZ-table.qza  \
+○	  --output-path exp-nosZ-table-dada2
+○	Convert biom feature table to .tsv
+■	biom convert -i exp-nosZ-table-dada2/feature-table.biom -o nosZ-table-dada2.tsv --to-tsv
+○	
+○	qiime feature-table heatmap \
+○	  --i-table dada2-trimmed-nosZ-table.qza \
+○	  --p-color-scheme viridis \
+○	 --o-visualization dada2-trimmed-nosZ-table-heatmap.qzv
+○	Remove ‘reserve’ samples:
+■	qiime feature-table filter-samples \
+■	--i-table dada2-trimmed-nosZ-table.qza \
+■	--m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
+■	--p-where "Location IS 'Reserve'" \
+■	--p-exclude-ids \
+■	--o-filtered-table nosZ_active_df/active-dada2-trimmed-nosZ-table.qza
+■	qiime feature-table summarize \
+■	  --i-table nosZ_active_df/active-dada2-trimmed-nosZ-table.qza \
+■	  --o-visualization nosZ_active_df/active-dada2-trimmed-nosZ-table.qzv \
+■	  --m-sample-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt
+■	qiime tools export   \
+■	  --input-path nosZ_active_df/active-dada2-trimmed-nosZ-table.qza  \
+■	  --output-path nosZ_active_df/exp-active-nosZ-table-dada2
+■	Convert biom feature table to .tsv
+●	biom convert -i nosZ_active_df/exp-active-nosZ-table-dada2/feature-table.biom -o nosZ_active_df/exp-active-nosZ-table-dada2/active-nosZ-table-dada2.tsv --to-tsv
 
