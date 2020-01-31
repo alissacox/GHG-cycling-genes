@@ -4,7 +4,7 @@ Here are the steps to create the "custom" reference database for *pmoA* and *nos
 * based on [this forum post](https://forum.qiime2.org/t/creating-a-custom-reference-database/3488) but with lots of detail that was missing
 ## a note on reference database selection...
 * There are lots of options for functional gene reference databases. The [FunGene database]() is awesome, but downloading lots of their sequences at once is troublesome from the web interface, AND because their sequences are based on protein accession numbers, there are lots of duplicate gene accession numbers (at least for *pmoA* and *nosZ*) which make them impossible to import into QIIME2. There is probably some way around this (suggestions welcome).
-* We ended up using the [NCBI nuleotide database](https://www.ncbi.nlm.nih.gov/nucleotide/) to download our "reference sequences" because it's easier to download all sequences matching a search term from the web interface. There are surely more elegant solutions to this (suggestions welcome).
+* We ended up using the [NCBI nuleotide database](https://www.ncbi.nlm.nih.gov/nucleotide/) to download our "reference sequences" because it's easier to download all sequences matching a search term from the web interface at once. There are surely more elegant solutions to this (suggestions welcome).
 
 # Download reference sequences (FASTA format) from [NCBI nucleotide database](https://www.ncbi.nlm.nih.gov/nucleotide/)
 Can easily download fasta files from NCBI nucleotide search for all “hits”:
