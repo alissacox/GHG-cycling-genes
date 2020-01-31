@@ -11,7 +11,7 @@ qiime --help
 ```
 # Read in Miseq Fastq files (with embedded barcodes)
 ## A little 'homework'
-based on [QIIME Tutorial](https://docs.qiime2.org/2019.10/tutorials/importing/#sequence-data-with-sequence-quality-information-i-e-fastq http://qiime.org/1.3.0/tutorials/processing_illumina_data.html)
+* based on [QIIME2 Tutorial](https://docs.qiime2.org/2019.10/tutorials/importing/#sequence-data-with-sequence-quality-information-i-e-fastq http://qiime.org/1.3.0/tutorials/processing_illumina_data.html)
 * Need to figure out format of our fastq files…. 
   * Indexes appear to be the last several BPs (8+8) of the 1st line in the FastQ file (AHC01):
 > @M00763:347:000000000-CP6CN:1:1101:13406:1878 1:N:0:ACTCGCTA+TCGACTAG■	GGTGACTGGGACTTCTGGGTTGACTGGAAGGATCGCCGTATGTGGCCGACGGTTGTGCCGATTCTGGGCGTGACCTTCTGCGCGGCGACGCAGGCGTTTTTCTGGGTGAACTTCCGTCTGCCGTTTGGCGCGGTGTTCGCGGCGCTGGGCCTGCTGATCGGCGAGTGGATCAACCGCTACGTGAACTTCTGGGGTTGGACCTATTTCCCGATCTCGCTGGTGTTCCCGTCGGCTCTGATGGTTCCGGCGATCTGGCTTGACGTGATCCTTCTGCTTTCGGGCTCCTATGTGATCACGGCGA
@@ -38,3 +38,9 @@ qiime demux summarize \
 	  --i-data demux-paired-end.qza \
 	  --o-visualization demux-paired-end.qzv
 ```
+# Remove Primers and separate the pooled genes from one another -- use ['cutadapt'](https://cutadapt.readthedocs.io/en/stable/guide.html#basic-usage) pre read-joining
+* we are doing this step to separate the *pmoA* and *nosZ* sequences from one another, because they were pooled in the MiSeq run. DADA2 includes parameters to trim off primers, but then we'd still have the genes mixed together which causes problems for DADA2...
+* the sequencing overhangs are already removed in “raw reads” from MiSeq run
+* In our sequences, the adapters should NOT be linked in raw reads because raw reads of 300bps are shorter than any of our target gene sequences (>300 bps). So need to find each primer and its reverse complement separately. 
+* Cutadapt can take ALL wildcard bases. [Useful tool](http://arep.med.harvard.edu/labgc/adnan/projects/Utilities/revcomp.html) to auto-create reverse complements
+
