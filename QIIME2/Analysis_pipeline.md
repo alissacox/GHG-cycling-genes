@@ -250,7 +250,7 @@ qiime phylogeny align-to-tree-mafft-fasttree \
 
 # Alpha Diversity
 * Check out the [excellent overview of all the alpha & beta diversity “options”](https://forum.qiime2.org/t/alpha-and-beta-diversity-explanations-and-commands/2282) in QIIME2
-* This code is based on the tutorial
+* This code is based on the [Moving pictures tutorial](https://docs.qiime2.org/2019.10/tutorials/moving-pictures/)
 
 In general, we chose sampling depth (for rarification) based on sample with lowest reasonable # of sequence frequencies
 ## pmoA 
@@ -304,40 +304,57 @@ qiime diversity alpha-rarefaction \
 ```
 In contrast to *pmoA*, we had LOT of *nosZ* sequences in our samples. Our rarifaction curves show nice plateaus for any max depth over 15k.
 ```
-○	qiime diversity core-metrics-phylogenetic \
-○	  --i-phylogeny rooted-dada2-nosZ-tree.qza \
-○	  --i-table dada2-trimmed-nosZ-table.qza \
-○	  --p-sampling-depth 2956 \
-○	  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
-○	  --output-dir core-nosZ-metrics-results-dada2
-○	qiime diversity alpha-group-significance --i-alpha-diversity core-nosZ-metrics-results-dada2/faith_pd_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-nosZ-metrics-results-dada2/faith-pd-group-significance.qzv
-○	qiime diversity alpha-group-significance --i-alpha-diversity core-nosZ-metrics-results-dada2/evenness_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-nosZ-metrics-results-dada2/evenness-group-significance.qzv
-○	qiime diversity alpha-group-significance --i-alpha-diversity core-nosZ-metrics-results-dada2/shannon_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-nosZ-metrics-results-dada2/shannon_vector-group-significance.qzv
-○	Looking at correlations among metadata and samples…
-■	qiime diversity alpha-correlation
-Beta Diversity
-Dada2 outputs
-●	nosZ
-○	Categorical variables
-○	qiime diversity beta-group-significance \
-○	  --i-distance-matrix core-nosZ-metrics-results-dada2/weighted_unifrac_distance_matrix.qza \
-○	  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
-○	  --m-metadata-column Location \
-○	  --o-visualization core-nosZ-metrics-results-dada2/weight-uni-location-significance.qzv 
-○	Continuous variables
-○	qiime diversity beta-correlation --i-distance-matrix core-nosZ-metrics-results-dada2/jaccard_distance_matrix.qza --p-intersect-ids  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --m-metadata-column Core_BD_g_cm3 --o-metadata-distance-matrix core-nosZ-metrics-results-dada2/jac-BD-beta-correlation-matrix.qza --o-mantel-scatter-visualization core-nosZ-metrics-results-dada2/jac-BD-flux-beta-correlation.qzv
-○	
-○	Emperor plot:
-■	qiime emperor plot \
-■	  --i-pcoa core-nosZ-metrics-results-dada2/unweighted_unifrac_pcoa_results.qza \
-■	  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
-■	  --p-custom-axes N2O_Flux_umol_m^2_h\
-■	  --o-visualization core-nosZ-metrics-results-dada2/unweighted-unifrac-emperor-N2O-flux.qzv
-○	pmoA
-○	qiime diversity beta-group-significance \
-○	  --i-distance-matrix core-pmoA-metrics-results-dada2/unweighted_unifrac_distance_matrix.qza \
-○	  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
-○	  --m-metadata-column Depth \
-○	  --o-visualization core-pmoA-metrics-results-dada2/unweighted-unifrac-depth-significance.qzv
-○	qiime diversity beta-correlation --i-distance-matrix core-pmoA-metrics-results-dada2/weighted_unifrac_distance_matrix.qza --p-intersect-ids  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --m-metadata-column CH4_Flux_umol_m2_h --o-metadata-distance-matrix core-pmoA-metrics-results-dada2/weight-uni-meth-flux-beta-correlation-matrix.qza --o-mantel-scatter-visualization core-pmoA-metrics-results-dada2/weight-uni-meth-flux-beta-correlation.qzv
+qiime diversity core-metrics-phylogenetic \
+  --i-phylogeny rooted-dada2-nosZ-tree.qza \
+  --i-table dada2-trimmed-nosZ-table.qza \
+  --p-sampling-depth 2956 \
+  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
+  --output-dir core-nosZ-metrics-results-dada2
+```
+### Categorical variable comparisons:
+```
+qiime diversity alpha-group-significance --i-alpha-diversity core-nosZ-metrics-results-dada2/faith_pd_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-nosZ-metrics-results-dada2/faith-pd-group-significance.qzv
+qiime diversity alpha-group-significance --i-alpha-diversity core-nosZ-metrics-results-dada2/evenness_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-nosZ-metrics-results-dada2/evenness-group-significance.qzv
+qiime diversity alpha-group-significance --i-alpha-diversity core-nosZ-metrics-results-dada2/shannon_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-nosZ-metrics-results-dada2/shannon_vector-group-significance.qzv
+```
+### Continuous variable comparisons (correlations among metadata and samples…)
+```
+qiime diversity alpha-correlation  --i-alpha-diversity core-nosZ-metrics-results-dada2/shannon_vector.qza --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --o-visualization core-nosZ-metrics-results-dada2/shannon-alpha-correlation.qzv
+```
+# Beta Diversity
+* This is adapted from the [Moving pictures tutorial](https://docs.qiime2.org/2019.10/tutorials/moving-pictures/)
+## pmoA
+Categorical variables:
+```
+qiime diversity beta-group-significance \
+  --i-distance-matrix core-pmoA-metrics-results-dada2/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
+  --m-metadata-column Depth \
+  --o-visualization core-pmoA-metrics-results-dada2/unweighted-unifrac-depth-significance.qzv
+```
+Continuous variables:
+```
+qiime diversity beta-correlation --i-distance-matrix core-pmoA-metrics-results-dada2/weighted_unifrac_distance_matrix.qza --p-intersect-ids  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --m-metadata-column CH4_Flux_umol_m2_h --o-metadata-distance-matrix core-pmoA-metrics-results-dada2/weight-uni-meth-flux-beta-correlation-matrix.qza --o-mantel-scatter-visualization core-pmoA-metrics-results-dada2/weight-uni-meth-flux-beta-correlation.qzv
+```
+## nosZ
+Categorical variables:
+```
+qiime diversity beta-group-significance \
+  --i-distance-matrix core-nosZ-metrics-results-dada2/weighted_unifrac_distance_matrix.qza \
+  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
+  --m-metadata-column Location \
+  --o-visualization core-nosZ-metrics-results-dada2/weight-uni-location-significance.qzv 
+```
+Continuous variables:
+```
+qiime diversity beta-correlation --i-distance-matrix core-nosZ-metrics-results-dada2/jaccard_distance_matrix.qza --p-intersect-ids  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt --m-metadata-column Core_BD_g_cm3 --o-metadata-distance-matrix core-nosZ-metrics-results-dada2/jac-BD-beta-correlation-matrix.qza --o-mantel-scatter-visualization core-nosZ-metrics-results-dada2/jac-BD-flux-beta-correlation.qzv
+```
+Emperor plot:
+```
+qiime emperor plot \
+  --i-pcoa core-nosZ-metrics-results-dada2/unweighted_unifrac_pcoa_results.qza \
+  --m-metadata-file 191221_AHC_sequencing_sample_GHG_metadata.txt \
+  --p-custom-axes N2O_Flux_umol_m^2_h\
+  --o-visualization core-nosZ-metrics-results-dada2/unweighted-unifrac-emperor-N2O-flux.qzv
+```
 
