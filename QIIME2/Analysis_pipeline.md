@@ -1,4 +1,5 @@
-Here is the pipeline for analyzing raw Illumina MiSeq reads of functional gene amplicons!
+Here is the pipeline for analyzing raw Illumina MiSeq reads of functional gene amplicons! The run that generated these genes had two different gene amplicons (*pmoA* & *nosZ*) pooled equimolarly per sample. 
+* Samples AHC90-96 contain *nosZ* only.
 
 # Start QIIME2
 * Need to have installed [QIIME2 version 2019.10](https://docs.qiime2.org/2019.10/install/native/) natively installed via [miniconda](https://docs.conda.io/en/latest/miniconda.html)
@@ -43,4 +44,35 @@ qiime demux summarize \
 * the sequencing overhangs are already removed in “raw reads” from MiSeq run
 * In our sequences, the adapters should NOT be linked in raw reads because raw reads of 300bps are shorter than any of our target gene sequences (>300 bps). So need to find each primer and its reverse complement separately. 
 * Cutadapt can take ALL wildcard bases. [Useful tool](http://arep.med.harvard.edu/labgc/adnan/projects/Utilities/revcomp.html) to auto-create reverse complements
+## To separate *pmoA* sequences from "all" the sequences using the primers we used for initial PCR (still embedded in the raw fasta files we imported from the MiSeq run)
+* Make a pmoA folder to keep the rest of the pmoA analyis in - this will make things less confusing later on since some of the outputs will have the same names as the outputs from the same nosZ analyses!
+Because our PCR amplicons were sheared to 300bp length for the MiSeq run, our sequences will contain both the original primers and their reverse complements. So we need to trim the primer off beginning of each strand & the reverse complement of the other primer at the end of each strand
+* Our primers:
+	* F primer (A189gcF): GGNGACTGGGACTTCTGG
+		* Reverse complement = CCAGAAGTCCCAGTCNCC
+	* R primer (mb661R): CCGGMGCAACGTCYTTACC
+		* Reverse complement = GGTAARGACGTTGCKCCGG
+* Cutadapt terminology:
+	* -...adapter-* = the sequence found at 3’ END of sequence (reverse complement to opposite primer)
+	* -..front-* = sequence found at 5’ START of sequence (actual primer)
+To cut the the *pmoA* primers from the samples and only keeping reads that were trimmed:
+```
+qiime cutadapt trim-paired \
+  --i-demultiplexed-sequences demux-paired-end.qza \
+  --p-front-f GGNGACTGGGACTTCTGG \
+  --p-adapter-f GGTAARGACGTTGCKCCGG \
+  --p-front-r CCGGNGCAACGTCNTTACC \
+  --p-adapter-r CCAGAAGTCCCAGTCNCC \
+  --p-cores 8 \
+  --p-discard-untrimmed \
+  --p-overlap 10 \
+  --p-minimum-length 150 \
+  --p-error-rate 0.3 \
+  --o-trimmed-sequences pmoA/trimmed-pmoA-unjoined-seqs.qza
+# This step Takes ~10 mins to run
+qiime demux summarize \
+  --i-data pmoA/trimmed-pmoA-unjoined-seqs.qza \
+  --o-visualization pmoA/trimmed-pmoA-unjoined-seqs.qzv
+```
+Based on the output, this seems to have worked. <100 sequences show up in AHC 90-96, which is good because these samples only contain *nosZ*, and <100 is an order of magnitude below the next sample which actually has pmoA (showing ~1K sequences). We’ll see if they get filtered out later…
 
