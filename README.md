@@ -1,5 +1,5 @@
 # GHG-cycling-genes
-https://zenodo.org/badge/DOI/10.5281/zenodo.3825228.svg https://doi.org/10.5281/zenodo.3825228
+![DOI: 10.5281/zenodo.3825228](https://zenodo.org/badge/DOI/10.5281/zenodo.3825228.svg) [DOI: 10.5281/zenodo.3825228](https://doi.org/10.5281/zenodo.3825228)
 
 This is an annotated pipeline to analyze **_functional gene amplicons_** from Illumina MiSeq runs with QIIME 2 and other commandline tools - written by people trying to learn how to code at the same time as learning how to run these analyses. This resource is meant to help others  (like us) who are just learning how to use QIIME2 and basic commandline coding. We have found that often times the QIIME2 user forums answers/solutions seem to be written by people who are experts and assume others know how to do many of the basic behind-the-scenes formatting and editing of data/files that were mysterious to us. Here we present code and descriptions that will hopefully help fellow n00bs. We hope this is useful, and welcome suggestions for improvement!
 
